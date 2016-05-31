@@ -1,4 +1,4 @@
-from requests import get
+from ..requests import get
 from .default import DEFAULT_URL
 
 
@@ -16,9 +16,9 @@ class ApiClient:
         return self.base_url + sub_url
 
     def _get_json(self, url, params=None):
-        response = get(url, params)
+        response = get(url, params, verify=False)
         return response.json()
 
     def _get_content(self, url, params=None):
-        response = get(url, params, stream=True)
+        response = get(url, params, stream=True, verify=False)
         return response.content
