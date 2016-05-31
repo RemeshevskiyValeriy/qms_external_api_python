@@ -1,4 +1,8 @@
-from ..requests import get
+try:
+    from ..requests import get
+except:
+    from requests import get
+
 from .default import DEFAULT_URL
 
 
