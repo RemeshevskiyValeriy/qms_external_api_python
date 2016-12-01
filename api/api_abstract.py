@@ -6,7 +6,7 @@ except:
 from .default import DEFAULT_URL
 
 
-class ApiClient:
+class ApiClient(object):
     VERSION = 0
 
     def __init__(self, endpoint_url=DEFAULT_URL):
