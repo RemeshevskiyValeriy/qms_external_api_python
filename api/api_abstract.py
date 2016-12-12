@@ -11,6 +11,23 @@ class ApiClient:
 
     def __init__(self, endpoint_url=DEFAULT_URL):
         self.endpoint_url = endpoint_url
+        self.__proxy = {}
+        
+    def set_proxy(self, proxy_host, proxy_port, proxy_user, proxy_password):
+        if proxy_host != "":
+            proxy_url = proxy_host
+            if proxy_port != "":
+                proxy_url = "%s:%s" % (proxy_url, proxy_port)
+            if proxy_user != "":
+                proxy_url = "%s:%s@%s" % (
+                    proxy_user,
+                    proxy_password,
+                    proxy_url
+                )
+
+            self.__proxy = {
+                "http": proxy_url
+            }
 
     @property
     def base_url(self):
@@ -20,7 +37,12 @@ class ApiClient:
         return self.base_url + sub_url
 
     def _get_json(self, url, params=None):
-        response = get(url, params, verify=False)
+        _params = {}
+        if params is not None:
+            _params.update(params)
+            _params.update(self.__proxy)
+
+        response = get(url, _params, verify=False)
         return response.json()
 
     def _get_content(self, url, params=None):

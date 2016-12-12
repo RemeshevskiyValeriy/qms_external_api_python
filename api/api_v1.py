@@ -23,6 +23,9 @@ class ApiClientV1(ApiClient):
 
         return self._get_json(self.full_url(sub_url), params)
 
+    def geoservice_info_url(self, gs_id):
+        sub_url = 'geoservices/' + str(gs_id)
+        return self.endpoint_url + "/" + sub_url
 
     def search_geoservices(self, search_str):
         """
