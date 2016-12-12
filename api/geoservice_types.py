@@ -1,5 +1,4 @@
-
-class GeoServiceType:
+class GeoServiceType(object):
     TMS = 'tms'
     WMS = 'wms'
     WFS = 'wfs'
