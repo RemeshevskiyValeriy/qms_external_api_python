@@ -27,6 +27,9 @@ class ApiClientV1(ApiClient):
         sub_url = 'geoservices/' + str(gs_id)
         return self.endpoint_url + "/" + sub_url
 
+    def geoservice_report_url(self, gs_id):
+        return self.geoservice_info_url(gs_id) + "/?show-report-problem=1"
+
     def search_geoservices(self, search_str):
         """
         Shortcut for search geoservices methods
