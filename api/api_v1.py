@@ -4,12 +4,13 @@ from .api_abstract import ApiClient
 class ApiClientV1(ApiClient):
     VERSION = 1
 
-    def get_geoservices(self, type_filter=None, epsg_filter=None, search_str=None):
+    def get_geoservices(self, type_filter=None, epsg_filter=None, search_str=None, intersects_boundary=None):
         """
         Geoservices list retrieve
         :param type: Type of geoservice - ['tms' | 'wms' | 'wfs' | 'geojson']
         :param epsg: EPSG code of geoservice CRS - any integer. Example: 4326, 3857
         :param search_str: Search name or description. Examples: 'osm', 'satellite', 'transport'
+        :param intersects_boundary: Geom (WKT or EWKT format) for filter by intersects with boundary
         :return: List of geoservices
         """
         sub_url = 'geoservices'
@@ -20,6 +21,8 @@ class ApiClientV1(ApiClient):
             params['epsg'] = epsg_filter
         if search_str:
             params['search'] = search_str
+        if intersects_boundary:
+            params['intersects_boundary'] = intersects_boundary
 
         return self._get_json(self.full_url(sub_url), params)
 
@@ -30,13 +33,13 @@ class ApiClientV1(ApiClient):
     def geoservice_report_url(self, gs_id):
         return self.geoservice_info_url(gs_id) + "/?show-report-problem=1"
 
-    def search_geoservices(self, search_str):
+    def search_geoservices(self, search_str, intersects_boundary=None):
         """
         Shortcut for search geoservices methods
         :param search_str: Search name or description
         :return: List of geoservices
         """
-        return self.get_geoservices(search_str=search_str)
+        return self.get_geoservices(search_str=search_str, intersects_boundary=intersects_boundary)
 
 
     def get_geoservice_info(self, geoservice):
