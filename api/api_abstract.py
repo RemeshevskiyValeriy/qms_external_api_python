@@ -46,5 +46,5 @@ class ApiClient(object):
         return response.json()
 
     def _get_content(self, url, params=None):
-        response = get(url, params, stream=True, verify=False)
+        response = get(url, params=params, stream=True, verify=False)
         return response.content
