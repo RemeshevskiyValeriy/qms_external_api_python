@@ -42,7 +42,7 @@ class ApiClient(object):
             _params.update(params)
             _params.update(self.__proxy)
 
-        response = get(url, _params, verify=False)
+        response = get(url, params=_params, verify=False)
         return response.json()
 
     def _get_content(self, url, params=None):
