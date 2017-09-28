@@ -4,13 +4,14 @@ from .api_abstract import ApiClient
 class ApiClientV1(ApiClient):
     VERSION = 1
 
-    def get_geoservices(self, type_filter=None, epsg_filter=None, search_str=None, intersects_boundary=None):
+    def get_geoservices(self, type_filter=None, epsg_filter=None, search_str=None, intersects_boundary=None, cumulative_status=None):
         """
         Geoservices list retrieve
         :param type: Type of geoservice - ['tms' | 'wms' | 'wfs' | 'geojson']
         :param epsg: EPSG code of geoservice CRS - any integer. Example: 4326, 3857
         :param search_str: Search name or description. Examples: 'osm', 'satellite', 'transport'
         :param intersects_boundary: Geom (WKT or EWKT format) for filter by intersects with boundary
+        :param cumulative_status: Status of service: ['works' | 'problematic' | 'failed']
         :return: List of geoservices
         """
         sub_url = 'geoservices'
@@ -23,6 +24,8 @@ class ApiClientV1(ApiClient):
             params['search'] = search_str
         if intersects_boundary:
             params['intersects_boundary'] = intersects_boundary
+        if cumulative_status:
+            params['cumulative_status'] = cumulative_status
 
         return self._get_json(self.full_url(sub_url), params)
 
