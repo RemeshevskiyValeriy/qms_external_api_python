@@ -6,6 +6,14 @@ except:
 from .default import DEFAULT_URL
 
 
+class QmsNews(object):
+    def __init__(self, i18n_texts):
+        self.i18n_texts = i18n_texts
+
+    def get_text(self, lang):
+        return self.i18n_texts.get(lang, self.i18n_texts.get('en'))
+
+
 class ApiClient(object):
     VERSION = 0
 
@@ -48,3 +56,20 @@ class ApiClient(object):
     def _get_content(self, url, params=None):
         response = get(url, params=params, stream=True, verify=False)
         return response.content
+
+    def get_news(self):
+        url = '%s/static/news.json' % (self.endpoint_url, )
+
+        try:
+            response = get(url, verify=False)
+            if response.ok:
+                news_json = response.json()
+                i18n_texts = {}
+                i18n_texts['en'] = news_json.get('text_en')
+                i18n_texts['ru'] = news_json.get('text_ru')
+                return QmsNews(i18n_texts)
+
+        except Exception as e:
+            pass
+
+        return None
