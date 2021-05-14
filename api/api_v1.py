@@ -4,7 +4,7 @@ from .api_abstract import ApiClient
 class ApiClientV1(ApiClient):
     VERSION = 1
 
-    def get_geoservices(self, type_filter=None, epsg_filter=None, search_str=None, intersects_boundary=None, cumulative_status=None):
+    def get_geoservices(self, type_filter=None, epsg_filter=None, search_str=None, intersects_boundary=None, cumulative_status=None, limit=None, offset=None):
         """
         Geoservices list retrieve
         :param type: Type of geoservice - ['tms' | 'wms' | 'wfs' | 'geojson']
@@ -26,6 +26,10 @@ class ApiClientV1(ApiClient):
             params['intersects_boundary'] = intersects_boundary
         if cumulative_status:
             params['cumulative_status'] = cumulative_status
+        if limit:
+            params['limit'] = limit
+        if offset is not None:
+            params['offset'] = offset
 
         return self._get_json(self.full_url(sub_url), params)
 
