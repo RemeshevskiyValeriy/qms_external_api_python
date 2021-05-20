@@ -5,6 +5,8 @@ except:
 
 from .default import DEFAULT_URL
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class QmsNews(object):
     def __init__(self, i18n_texts):
