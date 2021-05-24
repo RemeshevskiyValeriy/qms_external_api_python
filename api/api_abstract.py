@@ -5,9 +5,6 @@ except:
 
 from .default import DEFAULT_URL
 
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 class QmsNews(object):
     def __init__(self, i18n_texts):
         self.i18n_texts = i18n_texts
@@ -52,18 +49,18 @@ class ApiClient(object):
             _params.update(params)
             _params.update(self.__proxy)
 
-        response = get(url, params=_params, verify=False)
+        response = get(url, params=_params, verify=True)
         return response.json()
 
     def _get_content(self, url, params=None):
-        response = get(url, params=params, stream=True, verify=False)
+        response = get(url, params=params, stream=True, verify=True)
         return response.content
 
     def get_news(self):
         url = '%s/static/news.json' % (self.endpoint_url, )
 
         try:
-            response = get(url, verify=False)
+            response = get(url, verify=True)
             if response.ok:
                 news_json = response.json()
                 i18n_texts = {}
