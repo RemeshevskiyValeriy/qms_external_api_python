@@ -33,7 +33,8 @@ class ApiClient(object):
                 )
 
             self.__proxy = {
-                "http": proxy_url
+                "http": proxy_url,
+                "https": proxy_url
             }
 
     @property
@@ -47,9 +48,8 @@ class ApiClient(object):
         _params = {}
         if params is not None:
             _params.update(params)
-            _params.update(self.__proxy)
 
-        response = get(url, params=_params, verify=True)
+        response = get(url, params=_params, proxies=self.__proxy, verify=True)
         return response.json()
 
     def _get_content(self, url, params=None):
