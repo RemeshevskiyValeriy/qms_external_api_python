@@ -34,7 +34,7 @@ class ApiClientV1(QgsApiClient):
         return self._get_json(self.full_url(sub_url), params)
 
     def geoservice_info_url(self, gs_id):
-        sub_url = 'geoservices/' + str(gs_id)
+        sub_url = f'geoservices/{gs_id}/'
         return self.endpoint_url + "/" + sub_url
 
     def geoservice_report_url(self, gs_id):
@@ -65,7 +65,7 @@ class ApiClientV1(QgsApiClient):
         else:
             raise ValueError('Invalid geoservice argument')
 
-        sub_url = 'geoservices/' + str(gs_id)
+        sub_url = f'geoservices/{gs_id}/'
         return self._get_json(self.full_url(sub_url))
 
 
