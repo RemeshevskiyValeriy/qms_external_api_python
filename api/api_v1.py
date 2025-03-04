@@ -1,7 +1,7 @@
-from .api_abstract import ApiClient
+from .api_qgis import QgsApiClient
 
 
-class ApiClientV1(ApiClient):
+class ApiClientV1(QgsApiClient):
     VERSION = 1
 
     def get_geoservices(self, type_filter=None, epsg_filter=None, search_str=None, intersects_boundary=None, cumulative_status=None, limit=None, offset=None):
@@ -14,7 +14,7 @@ class ApiClientV1(ApiClient):
         :param cumulative_status: Status of service: ['works' | 'problematic' | 'failed']
         :return: List of geoservices
         """
-        sub_url = 'geoservices'
+        sub_url = 'geoservices/'
         params = {}
         if type_filter:
             params['type'] = type_filter
