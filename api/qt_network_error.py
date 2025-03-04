@@ -2,18 +2,12 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
 
-from nextgis_connect.exceptions import NgConnectException
-
 
 @dataclass
 class QtNetworkErrorInfo:
     code: int
     constant: str
     description: str
-
-    def add_exception_notes(self, error: NgConnectException) -> None:
-        error.add_note(f"Network error: {self.constant}")
-        error.add_note(f"Error description: {self.description}")
 
 
 class QtNetworkError(Enum):
