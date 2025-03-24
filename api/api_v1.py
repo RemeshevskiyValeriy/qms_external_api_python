@@ -38,7 +38,7 @@ class ApiClientV1(QgsApiClient):
         return self.endpoint_url + "/" + sub_url
 
     def geoservice_report_url(self, gs_id):
-        return self.geoservice_info_url(gs_id) + "/?show-report-problem=1"
+        return self.geoservice_info_url(gs_id) + "?show-report-problem=1"
 
     def search_geoservices(self, search_str, intersects_boundary=None):
         """
