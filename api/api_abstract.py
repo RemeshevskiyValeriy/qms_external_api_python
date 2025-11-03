@@ -1,76 +1,146 @@
-try:
-    from ..requests import get
-except:
-    from requests import get
+import json
+from typing import Any, Dict, Optional
 
-from .default import DEFAULT_URL
+from qgis.core import QgsNetworkAccessManager
+from qgis.PyQt.QtCore import QUrl, QUrlQuery
+from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 
-class QmsNews(object):
-    def __init__(self, i18n_texts):
+from quick_map_services.qms_external_api_python.api.default import DEFAULT_URL
+from quick_map_services.qms_external_api_python.api.qt_network_error import (
+    QtNetworkError,
+)
+
+
+class QmsNews:
+    """
+    Represents localized news content for QuickMapServices.
+    """
+
+    def __init__(self, i18n_texts: Dict[str, str]) -> None:
+        """
+        Initialize QmsNews with translations.
+
+        :param i18n_texts: Dictionary mapping language codes to text.
+        :type i18n_texts: Dict[str, str]
+        """
         self.i18n_texts = i18n_texts
 
-    def get_text(self, lang):
-        return self.i18n_texts.get(lang, self.i18n_texts.get('en'))
+    def get_text(self, lang: str) -> Optional[str]:
+        """
+        Retrieve news text in the specified language.
+
+        :param lang: Language code (e.g., "en", "ru").
+        :type lang: str
+
+        :return: Localized news text or None if not available.
+        :rtype: Optional[str]
+        """
+        return self.i18n_texts.get(lang, self.i18n_texts.get("en"))
 
 
-class ApiClient(object):
-    VERSION = 0
+class ApiClient:
+    """
+    Base API client for QuickMapServices.
 
-    request_timeout = (5, 20) # connect and read timeouts
+    This class performs HTTP requests through
+    :class:`QgsNetworkAccessManager`, ensuring full integration
+    with QGIS network settings and proxy configuration.
+    """
 
-    def __init__(self, endpoint_url=DEFAULT_URL):
+    VERSION: int = 0
+
+    def __init__(self, endpoint_url: str = DEFAULT_URL) -> None:
+        """
+        Initialize the API client.
+
+        :param endpoint_url: Base API endpoint URL.
+        :type endpoint_url: str
+        """
         self.endpoint_url = endpoint_url
-        self.__proxy = {}
-        
-    def set_proxy(self, proxy_host, proxy_port, proxy_user, proxy_password):
-        if proxy_host != "":
-            proxy_url = proxy_host
-            if proxy_port != "":
-                proxy_url = "%s:%s" % (proxy_url, proxy_port)
-            if proxy_user != "":
-                proxy_url = "%s:%s@%s" % (
-                    proxy_user,
-                    proxy_password,
-                    proxy_url
-                )
-
-            self.__proxy = {
-                "http": proxy_url,
-                "https": proxy_url
-            }
 
     @property
-    def base_url(self):
-        return '%s/api/v%s/' % (self.endpoint_url, self.VERSION)
+    def base_url(self) -> str:
+        """
+        Construct the base URL including the API version.
 
-    def full_url(self, sub_url):
-        return self.base_url + sub_url
+        :return: Base API URL.
+        :rtype: str
+        """
+        return f"{self.endpoint_url}/api/v{self.VERSION}/"
 
-    def _get_json(self, url, params=None):
-        _params = {}
-        if params is not None:
-            _params.update(params)
+    def full_url(self, sub_url: str) -> str:
+        """
+        Build a full URL from the base endpoint and a subpath.
 
-        response = get(url, params=_params, proxies=self.__proxy, verify=True, timeout=self.request_timeout)
-        return response.json()
+        :param sub_url: Relative path for the request.
+        :type sub_url: str
 
-    def _get_content(self, url, params=None):
-        response = get(url, params=params, stream=True, verify=True, timeout=self.request_timeout)
-        return response.content
+        :return: Fully qualified API URL.
+        :rtype: str
+        """
+        return f"{self.base_url}{sub_url}"
 
-    def get_news(self):
-        url = '%s/static/news.json' % (self.endpoint_url, )
+    def _get_content(self, url: str, params: Optional[Dict[str, Any]] = None) -> bytes:
+        """
+        Perform a blocking GET request and return raw binary content.
 
+        :param url: The full URL to request.
+        :type url: str
+        :param params: Optional dictionary of query parameters.
+        :type params: Optional[Dict[str, Any]]
+
+        :return: Raw response content as bytes.
+        :rtype: bytes
+        """
+        qurl_query = QUrlQuery()
+        params = {} if params is None else params
+        for key, value in params.items():
+            qurl_query.addQueryItem(str(key), str(value))
+        qurl = QUrl(url)
+        qurl.setQuery(qurl_query)
+
+        request = QNetworkRequest(qurl)
+        response = QgsNetworkAccessManager.instance().blockingGet(request)
+
+        if response.error() != QNetworkReply.NetworkError.NoError:
+            error = QtNetworkError.from_qt(response.error())
+            error_code = error.value.code
+            message = error.value.description if error is not None else ""
+            raise ConnectionError(error_code, message)
+
+        return response.content().data()
+
+    def _get_json(self, url: str, params: Optional[Dict[str, Any]] = None) -> Any:
+        """
+        Perform a GET request and return decoded JSON data.
+
+        :param url: The full URL to request.
+        :type url: str
+        :param params: Optional query parameters.
+        :type params: Optional[Dict[str, Any]]
+
+        :return: Parsed JSON response.
+        :rtype: Any
+        """
+        content = self._get_content(url, params)
+        return json.loads(content.decode("utf-8"))
+
+    def get_news(self) -> Optional["QmsNews"]:
+        """
+        Retrieve localized news information from the static QMS endpoint.
+
+        :return: QmsNews instance or None if unavailable.
+        :rtype: Optional[QmsNews]
+        """
+        url = f"{self.endpoint_url}/static/news.json"
         try:
-            response = get(url, verify=True, timeout=self.request_timeout)
-            if response.ok:
-                news_json = response.json()
-                i18n_texts = {}
-                i18n_texts['en'] = news_json.get('text_en')
-                i18n_texts['ru'] = news_json.get('text_ru')
-                return QmsNews(i18n_texts)
-
-        except Exception as e:
-            pass
-
-        return None
+            content = self._get_content(url)
+            news_json = json.loads(content.decode("utf-8"))
+            return QmsNews(
+                {
+                    "en": news_json.get("text_en"),
+                    "ru": news_json.get("text_ru"),
+                }
+            )
+        except Exception:
+            return None

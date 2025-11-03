@@ -1,7 +1,9 @@
-from .api_qgis import QgsApiClient
+from quick_map_services.qms_external_api_python.api.api_abstract import (
+    ApiClient,
+)
 
 
-class ApiClientV1(QgsApiClient):
+class ApiClientV1(ApiClient):
     VERSION = 1
 
     def get_geoservices(self, type_filter=None, epsg_filter=None, search_str=None, intersects_boundary=None, cumulative_status=None, limit=None, offset=None):
