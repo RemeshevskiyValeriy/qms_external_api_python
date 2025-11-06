@@ -1,4 +1,4 @@
-from quick_map_services.qms_external_api_python.api.api_abstract import (
+from quick_map_services.qms_external_api_python.api.api_base import (
     ApiClient,
 )
 

@@ -5,7 +5,7 @@ from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import QUrl, QUrlQuery
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 
-from quick_map_services.qms_external_api_python.api.default import DEFAULT_URL
+from quick_map_services.core.settings import QmsSettings
 from quick_map_services.qms_external_api_python.api.qt_network_error import (
     QtNetworkError,
 )
@@ -49,14 +49,17 @@ class ApiClient:
 
     VERSION: int = 0
 
-    def __init__(self, endpoint_url: str = DEFAULT_URL) -> None:
+    def __init__(self, endpoint_url: Optional[str] = None) -> None:
         """
         Initialize the API client.
 
         :param endpoint_url: Base API endpoint URL.
-        :type endpoint_url: str
+        :type endpoint_url: Optional[str]
         """
-        self.endpoint_url = endpoint_url
+        settings = QmsSettings()
+        self.endpoint_url = (
+            endpoint_url if endpoint_url is not None else settings.endpoint_url
+        )
 
     @property
     def base_url(self) -> str:
